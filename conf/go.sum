@@ -1,0 +1,4 @@
+github.com/enolgor/go-utils/parse v1.0.0 h1:cvmCaUkP+x33a+Acbh/lsuRqi2C5tcToL8ye4bAcSOA=
+github.com/enolgor/go-utils/parse v1.0.0/go.mod h1:94GON1FxrESjvlpqiXb9vr4wO4T07GIA7LbYFyYmX0g=
+golang.org/x/text v0.12.0 h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=
+golang.org/x/text v0.12.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
