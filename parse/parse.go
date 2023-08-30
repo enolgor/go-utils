@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enolgor/go-utils/types"
+	"github.com/enolgor/go-utils/parse/types"
 	"golang.org/x/text/language"
 )
 
