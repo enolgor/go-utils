@@ -1,0 +1,16 @@
+github.com/enolgor/go-utils/client v1.0.0 h1:Y3t+vcwVsVDqxDGnE3VDNPH+DCof/+r0N+bicf/Rrbk=
+github.com/enolgor/go-utils/client v1.0.0/go.mod h1:KSME5h5aVWuzvSbsIBDFtTM6uQ/ch+bHlUZ4tkbESow=
+github.com/enolgor/go-utils/conf v1.0.0 h1:6Lnizvs83Oe5n/0RWBll2Ul7HuK1I4s+VOCQ/7EZ3MA=
+github.com/enolgor/go-utils/conf v1.0.0/go.mod h1:LCjInk11FZXjMi0yJEMfojfJioSlmH+d5rD6AIQQxU0=
+github.com/enolgor/go-utils/parse v1.0.0 h1:cvmCaUkP+x33a+Acbh/lsuRqi2C5tcToL8ye4bAcSOA=
+github.com/enolgor/go-utils/parse v1.0.0/go.mod h1:94GON1FxrESjvlpqiXb9vr4wO4T07GIA7LbYFyYmX0g=
+github.com/enolgor/go-utils/sec v1.0.0 h1:CAmDZRnrft2MsXOSHYh1V07vAABuKDTuHuw9DxBhLI0=
+github.com/enolgor/go-utils/sec v1.0.0/go.mod h1:WeaJRC5fb5N5UDyRVu4eGZkLlYAaH1HqvlGFA00UuaU=
+github.com/enolgor/go-utils/server v1.0.0 h1:JW94LumX30QvlNo+WX2iebLpSOAKXx//QcJokLkUK9w=
+github.com/enolgor/go-utils/server v1.0.0/go.mod h1:aO4noxrFP4OnPKIDUPIZjr/fusnO7+LwlNRFU95g3Ug=
+github.com/golang-jwt/jwt/v5 v5.0.0 h1:1n1XNM9hk7O9mnQoNBGolZvzebBQ7p93ULHRc28XJUE=
+github.com/golang-jwt/jwt/v5 v5.0.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
+golang.org/x/crypto v0.12.0 h1:tFM/ta59kqch6LlvYnPa0yx5a83cL2nHflFhYKvv9Yk=
+golang.org/x/crypto v0.12.0/go.mod h1:NF0Gs7EO5K4qLn+Ylc+fih8BSTeIjAP05siRnAh98yw=
+golang.org/x/text v0.12.0 h1:k+n5B8goJNdU7hSvEtMUz3d1Q6D/XW4COJSJR6fN0mc=
+golang.org/x/text v0.12.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
