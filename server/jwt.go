@@ -92,22 +92,22 @@ func (ja *JwtAuth) LoginHandler() http.HandlerFunc {
 			redirect = "/"
 		}
 		if err = req.ParseForm(); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
 			return
 		}
 		if user = req.FormValue("user"); user == "" {
-			w.WriteHeader(http.StatusBadRequest)
+			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
 			return
 		}
 		if pass = req.FormValue("pass"); pass == "" {
-			w.WriteHeader(http.StatusBadRequest)
+			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
 			return
 		}
 		if ok, err := ja.verifyUser(user, pass); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			Response(w).Status(http.StatusInternalServerError).Redirect(redirect)
 			return
 		} else if !ok {
-			w.WriteHeader(http.StatusUnauthorized)
+			Response(w).Status(http.StatusUnauthorized).Redirect(redirect)
 			return
 		}
 
@@ -119,7 +119,8 @@ func (ja *JwtAuth) LoginHandler() http.HandlerFunc {
 
 		tkn, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(ja.key)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			Response(w).Status(http.StatusInternalServerError).Redirect(redirect)
+			return
 		}
 		Response(w).
 			WithCookie(&http.Cookie{
