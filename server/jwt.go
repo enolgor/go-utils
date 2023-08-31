@@ -132,6 +132,21 @@ func (ja *JwtAuth) LoginHandler(authorizedRedirect, unathorizedRedirect string) 
 	}
 }
 
+func (ja *JwtAuth) Logout(redirect string) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		expiration := time.Now().Add(-1 * time.Hour)
+		Response(w).
+			WithCookie(&http.Cookie{
+				Name:     jwtCookieName,
+				Value:    "",
+				HttpOnly: true,
+				Expires:  expiration,
+				SameSite: http.SameSiteStrictMode,
+			}).
+			Redirect(redirect)
+	}
+}
+
 func (ja *JwtAuth) SampleAuthForm(target, defaultRedirect string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Query().Has("redirect") {
