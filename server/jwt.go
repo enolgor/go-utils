@@ -14,7 +14,7 @@ type JwtAuth struct {
 	parser     *jwt.Parser
 	key        []byte
 	expiration time.Duration
-	verifyUser func(user, pass string) (bool, error)
+	verifyUser func(user, pass string) (string, error)
 }
 
 const jwtCookieName string = "_token"
@@ -23,7 +23,7 @@ type jwtContextKey int
 
 const contextJwtClaims jwtContextKey = iota
 
-func NewJwtAuth(key []byte, expiration time.Duration, verifyUser func(user, pass string) (bool, error)) *JwtAuth {
+func NewJwtAuth(key []byte, expiration time.Duration, verifyUser func(user, pass string) (string, error)) *JwtAuth {
 	return &JwtAuth{
 		parser:     jwt.NewParser(jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name})),
 		key:        key,
@@ -100,10 +100,11 @@ func (ja *JwtAuth) LoginHandler(authorizedRedirect, unathorizedRedirect string) 
 			Response(w).Status(http.StatusBadRequest).Redirect(unathorizedRedirect)
 			return
 		}
-		if ok, err := ja.verifyUser(user, pass); err != nil {
+		var sub string
+		if sub, err = ja.verifyUser(user, pass); err != nil {
 			Response(w).Status(http.StatusInternalServerError).Redirect(unathorizedRedirect)
 			return
-		} else if !ok {
+		} else if sub == "" {
 			Response(w).Status(http.StatusUnauthorized).Redirect(unathorizedRedirect)
 			return
 		}
@@ -111,7 +112,7 @@ func (ja *JwtAuth) LoginHandler(authorizedRedirect, unathorizedRedirect string) 
 		expiration := time.Now().Add(ja.expiration)
 		claims := jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiration),
-			Subject:   user,
+			Subject:   sub,
 		}
 
 		tkn, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(ja.key)

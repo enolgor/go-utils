@@ -21,9 +21,12 @@ func init() {
 
 func Server(port int) {
 	key := parse.Must(parse.HexBytes)("bc27bec0c4291b4e43a2ec657d8afc9b668e158c6acd4004ffb1faa16c5b88bf")
-	jwt := server.NewJwtAuth(key, 5*time.Minute, func(user, pass string) (bool, error) {
+	jwt := server.NewJwtAuth(key, 5*time.Minute, func(user, pass string) (string, error) {
 		hpass, ok := hashedPasswords[user]
-		return ok && sec.ComparePassword(hpass, pass) == nil, nil
+		if ok && sec.ComparePassword(hpass, pass) == nil {
+			return user, nil
+		}
+		return "", nil
 	})
 	strictAuth := jwt.StrictAuthHandler("/login")
 	softAuth := jwt.SoftAuthHandler()
