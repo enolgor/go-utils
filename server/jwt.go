@@ -84,13 +84,10 @@ func (ja *JwtAuth) StrictAuthHandler(redirect string) ChainHandler {
 	}
 }
 
-func (ja *JwtAuth) LoginHandler(unathorizedRedirect string) http.HandlerFunc {
+func (ja *JwtAuth) LoginHandler(authorizedRedirect, unathorizedRedirect string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		var redirect, user, pass string
+		var user, pass string
 		var err error
-		if redirect = req.URL.Query().Get("redirect"); redirect == "" {
-			redirect = "/"
-		}
 		if err = req.ParseForm(); err != nil {
 			Response(w).Status(http.StatusBadRequest).Redirect(unathorizedRedirect)
 			return
@@ -130,7 +127,7 @@ func (ja *JwtAuth) LoginHandler(unathorizedRedirect string) http.HandlerFunc {
 				Expires:  expiration,
 				SameSite: http.SameSiteStrictMode,
 			}).
-			Redirect(redirect)
+			Redirect(authorizedRedirect)
 	}
 }
 
