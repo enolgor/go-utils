@@ -27,7 +27,7 @@ func Server(port int) {
 	})
 	strictAuth := jwt.StrictAuthHandler("/login")
 	softAuth := jwt.SoftAuthHandler()
-	login := jwt.LoginHandler("/")
+	login := jwt.LoginHandler("/", "/")
 	form := jwt.SampleAuthForm("/login", "/")
 
 	var router *server.Router
