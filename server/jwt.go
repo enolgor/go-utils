@@ -84,7 +84,7 @@ func (ja *JwtAuth) StrictAuthHandler(redirect string) ChainHandler {
 	}
 }
 
-func (ja *JwtAuth) LoginHandler() http.HandlerFunc {
+func (ja *JwtAuth) LoginHandler(unathorizedRedirect string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var redirect, user, pass string
 		var err error
@@ -92,22 +92,22 @@ func (ja *JwtAuth) LoginHandler() http.HandlerFunc {
 			redirect = "/"
 		}
 		if err = req.ParseForm(); err != nil {
-			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
+			Response(w).Status(http.StatusBadRequest).Redirect(unathorizedRedirect)
 			return
 		}
 		if user = req.FormValue("user"); user == "" {
-			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
+			Response(w).Status(http.StatusBadRequest).Redirect(unathorizedRedirect)
 			return
 		}
 		if pass = req.FormValue("pass"); pass == "" {
-			Response(w).Status(http.StatusBadRequest).Redirect(redirect)
+			Response(w).Status(http.StatusBadRequest).Redirect(unathorizedRedirect)
 			return
 		}
 		if ok, err := ja.verifyUser(user, pass); err != nil {
-			Response(w).Status(http.StatusInternalServerError).Redirect(redirect)
+			Response(w).Status(http.StatusInternalServerError).Redirect(unathorizedRedirect)
 			return
 		} else if !ok {
-			Response(w).Status(http.StatusUnauthorized).Redirect(redirect)
+			Response(w).Status(http.StatusUnauthorized).Redirect(unathorizedRedirect)
 			return
 		}
 
@@ -119,7 +119,7 @@ func (ja *JwtAuth) LoginHandler() http.HandlerFunc {
 
 		tkn, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(ja.key)
 		if err != nil {
-			Response(w).Status(http.StatusInternalServerError).Redirect(redirect)
+			Response(w).Status(http.StatusInternalServerError).Redirect(unathorizedRedirect)
 			return
 		}
 		Response(w).
