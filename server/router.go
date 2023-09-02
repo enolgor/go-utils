@@ -8,13 +8,11 @@ import (
 )
 
 type Router struct {
-	routes      []route
-	notFound    http.HandlerFunc
-	internalErr http.HandlerFunc
-}
-
-type RouterBuilder struct {
-	router *Router
+	routes          []route
+	notFoundHandler http.HandlerFunc
+	recoverHandler  http.HandlerFunc
+	preFilters      []http.HandlerFunc
+	postFilters     []http.HandlerFunc
 }
 
 type route struct {
@@ -24,71 +22,87 @@ type route struct {
 	handler  http.HandlerFunc
 }
 
-func NewRouterBuilder() *RouterBuilder {
-	return &RouterBuilder{&Router{routes: []route{}, notFound: nil, internalErr: nil}}
+func NewRouter() *Router {
+	return &Router{
+		routes:          []route{},
+		notFoundHandler: defaultNotFoundHandler,
+		recoverHandler:  defaultRecoverHandler,
+		preFilters:      []http.HandlerFunc{},
+		postFilters:     []http.HandlerFunc{},
+	}
 }
 
-func (r *RouterBuilder) register(method string, pathExpr string, handler http.HandlerFunc) *RouterBuilder {
-	r.router.routes = append(r.router.routes, route{method, pathExpr, nil, handler})
+func (r *Router) register(method string, pathExpr string, handler http.HandlerFunc) *Router {
+	matcher, err := path.Matcher(pathExpr)
+	if err != nil {
+		panic(err)
+	}
+	r.routes = append(r.routes, route{method, pathExpr, matcher, handler})
 	return r
 }
 
-func (r *RouterBuilder) Get(pathExpr string, handler http.HandlerFunc) *RouterBuilder {
+func (r *Router) Get(pathExpr string, handler http.HandlerFunc) *Router {
 	return r.register("GET", pathExpr, handler)
 }
 
-func (r *RouterBuilder) Post(pathExpr string, handler http.HandlerFunc) *RouterBuilder {
+func (r *Router) Post(pathExpr string, handler http.HandlerFunc) *Router {
 	return r.register("POST", pathExpr, handler)
 }
 
-func (r *RouterBuilder) Put(pathExpr string, handler http.HandlerFunc) *RouterBuilder {
+func (r *Router) Put(pathExpr string, handler http.HandlerFunc) *Router {
 	return r.register("PUT", pathExpr, handler)
 }
 
-func (r *RouterBuilder) Patch(pathExpr string, handler http.HandlerFunc) *RouterBuilder {
+func (r *Router) Patch(pathExpr string, handler http.HandlerFunc) *Router {
 	return r.register("PATCH", pathExpr, handler)
 }
 
-func (r *RouterBuilder) Delete(pathExpr string, handler http.HandlerFunc) *RouterBuilder {
+func (r *Router) Delete(pathExpr string, handler http.HandlerFunc) *Router {
 	return r.register("DELETE", pathExpr, handler)
 }
 
-func (r *RouterBuilder) NotFound(handler http.HandlerFunc) *RouterBuilder {
-	r.router.notFound = handler
+func (r *Router) NotFoundHandler(handler http.HandlerFunc) *Router {
+	r.notFoundHandler = handler
 	return r
 }
 
-func (r *RouterBuilder) InternalErr(handler http.HandlerFunc) *RouterBuilder {
-	r.router.internalErr = handler
+func (r *Router) RecoverHandler(handler http.HandlerFunc) *Router {
+	r.recoverHandler = handler
 	return r
 }
 
-var defaultNotFound = func(w http.ResponseWriter, req *http.Request) {
+func (r *Router) PreFilters(filters ...http.HandlerFunc) *Router {
+	r.preFilters = filters
+	return r
+}
+
+func (r *Router) PostFilters(filters ...http.HandlerFunc) *Router {
+	r.postFilters = filters
+	return r
+}
+
+func (r *Router) SubRoute(pathExpr string, router *Router) *Router {
+	var err error
+	for i := range router.routes {
+		router.routes[i].pathExpr = pathExpr + router.routes[i].pathExpr
+		if router.routes[i].matcher, err = path.Matcher(router.routes[i].pathExpr); err != nil {
+			panic(err)
+		}
+	}
+	r.register("ANY", pathExpr+"/(.*)", router.ServeHTTP)
+	return r
+}
+
+var defaultNotFoundHandler = func(w http.ResponseWriter, req *http.Request) {
 	Response(w).Status(http.StatusNotFound).WithBody(fmt.Sprintf("%s %s not found", req.Method, req.URL.Path)).AsTextPlain()
 }
 
-var defaultInternalErr = func(w http.ResponseWriter, req *http.Request) {
+var defaultRecoverHandler = func(w http.ResponseWriter, req *http.Request) {
 	err := Recover(req)
 	if err == nil {
 		err = "uknown"
 	}
 	Response(w).Status(http.StatusInternalServerError).WithBody(fmt.Sprintf("internal server error: %s", err)).AsTextPlain()
-}
-
-func (r *RouterBuilder) Build() (*Router, error) {
-	var err error
-	for i := range r.router.routes {
-		if r.router.routes[i].matcher, err = path.Matcher(r.router.routes[i].pathExpr); err != nil {
-			return nil, err
-		}
-	}
-	if r.router.notFound == nil {
-		r.router.notFound = defaultNotFound
-	}
-	if r.router.internalErr == nil {
-		r.router.internalErr = defaultInternalErr
-	}
-	return r.router, nil
 }
 
 type routerContextKey int
@@ -114,16 +128,36 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			AddContextValue(req, panicKey, rec)
-			r.internalErr(w, req)
+			r.recoverHandler(w, req)
+			r.applyPostFilters(w, req)
 		}
 	}()
 	pathParams := make(map[any]string)
+	var handler http.HandlerFunc
 	for _, route := range r.routes {
-		if req.Method == route.method && route.matcher(req.URL.Path, pathParams) {
+		if (route.method == "ANY" || req.Method == route.method) && route.matcher(req.URL.Path, pathParams) {
 			AddContextValue(req, pathParamsKey, pathParams)
-			route.handler(w, req)
-			return
+			handler = route.handler
+			break
 		}
 	}
-	r.notFound(w, req)
+	if handler == nil {
+		handler = r.notFoundHandler
+	}
+	rw := NewResponseWriter(w)
+	r.applyPreFilters(rw, req)
+	handler(rw, req)
+	r.applyPostFilters(rw, req)
+}
+
+func (r *Router) applyPreFilters(w http.ResponseWriter, req *http.Request) {
+	for _, filter := range r.preFilters {
+		filter(w, req)
+	}
+}
+
+func (r *Router) applyPostFilters(w http.ResponseWriter, req *http.Request) {
+	for _, filter := range r.postFilters {
+		filter(w, req)
+	}
 }
