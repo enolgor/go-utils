@@ -12,4 +12,7 @@ require (
 	golang.org/x/text v0.12.0
 )
 
-require golang.org/x/crypto v0.12.0 // indirect
+require (
+	github.com/google/uuid v1.3.1 // indirect
+	golang.org/x/crypto v0.12.0 // indirect
+)
