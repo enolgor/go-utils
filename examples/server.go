@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/enolgor/go-utils/jwtauth"
 	"github.com/enolgor/go-utils/parse"
 	"github.com/enolgor/go-utils/sec"
 	"github.com/enolgor/go-utils/server"
-	"github.com/go-utils/jwtauth"
 	"github.com/google/uuid"
 )
 

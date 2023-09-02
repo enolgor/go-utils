@@ -1,4 +1,4 @@
-module github.com/go-utils/jwtauth
+module github.com/enolgor/go-utils/jwtauth
 
 go 1.20
 
