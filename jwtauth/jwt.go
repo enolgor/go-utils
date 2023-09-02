@@ -59,6 +59,7 @@ func (s *Signer) CreateCookie(token string, expiration time.Time) *http.Cookie {
 func (s *Signer) ExpireCookie() *http.Cookie {
 	expiration := time.Now().Add(-1 * time.Hour)
 	return &http.Cookie{
+		Path:     "/",
 		Name:     s.TokenName,
 		Value:    "",
 		HttpOnly: true,
