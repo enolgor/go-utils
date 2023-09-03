@@ -89,7 +89,7 @@ func (r *Router) SubRoute(pathExpr string, router *Router) *Router {
 			panic(err)
 		}
 	}
-	r.register("ANY", pathExpr+"/(.*)", router.ServeHTTP)
+	r.register("ANY", pathExpr+"(.*)", router.ServeHTTP)
 	return r
 }
 
