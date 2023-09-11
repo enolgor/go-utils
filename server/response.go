@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 )
@@ -91,4 +92,12 @@ func (rb *responseBuilder) AsHtml() {
 
 func (rb *responseBuilder) Redirect(redirect string) {
 	rb.WithBody(fmt.Sprintf(`<html><header><script>window.location.replace("%s");</script></header><body></body></html>`, redirect)).AsHtml()
+}
+
+func (rb *responseBuilder) HtmlTemplate(temp *template.Template, data any) {
+	rb.WithBody(func(w io.Writer) {
+		if err := temp.Execute(w, data); err != nil {
+			panic(err)
+		}
+	}).AsHtml()
 }
