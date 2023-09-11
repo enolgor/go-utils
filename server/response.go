@@ -14,6 +14,7 @@ type ResponseBuilder interface {
 	WithHeader(key, value string) ResponseBuilder
 	WithCookie(cookie *http.Cookie) ResponseBuilder
 	Redirect(redirect string)
+	HtmlTemplate(temp *template.Template, data any)
 	As(contentType string)
 	AsTextPlain()
 	AsJson()
