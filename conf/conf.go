@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -86,10 +87,6 @@ func set[T Configurable](take *T, envKey, flagKey string, def T, f func(string) 
 	}
 }
 
-func Set[T Configurable](take *T, envKey, flagKey string, def T) {
-	set[T](take, envKey, flagKey, def, nil)
-}
-
 func setKVarray[K Configurable, V Configurable](take *[]*KeyValue[K, V], envKey, flagKey string, def []KeyValue[K, V], i int) {
 	//fmt.Printf("called i=%d\n", i)
 	if len(*take) < i+1 {
@@ -126,17 +123,88 @@ func setKVarray[K Configurable, V Configurable](take *[]*KeyValue[K, V], envKey,
 // 	setKVarray(take, envKey, flagKey, def, 0)
 // }
 
-func SetKV[K Configurable, V Configurable](take *KeyValue[K, V], envKey, flagKey string, def KeyValue[K, V]) {
+var validators []func() error = []func() error{}
+
+func wrap[T Configurable](env, flag string, take *T, validator func(*T) error) {
+	validators = append(validators, func() error {
+		if err := validator(take); err != nil {
+			return fmt.Errorf(`invalid value for env "%s" or flag "%s", %s`, env, flag, err.Error())
+		}
+		return nil
+	})
+}
+
+func wrapKV[K Configurable, V Configurable](env, flag string, take *KeyValue[K, V], keyValidator func(*K) error, valueValidator func(*V) error, keyValueValidator func(*K, *V) error) {
+	validators = append(validators, func() error {
+		if err := keyValidator(&take.Key); err != nil {
+			return fmt.Errorf(`invalid key for env "%s" or flag "%s", %s`, env, flag, err.Error())
+		}
+		return nil
+	})
+	validators = append(validators, func() error {
+		if err := valueValidator(&take.Value); err != nil {
+			return fmt.Errorf(`invalid value for env "%s" or flag "%s", %s`, env, flag, err.Error())
+		}
+		return nil
+	})
+	validators = append(validators, func() error {
+		if err := keyValueValidator(&take.Key, &take.Value); err != nil {
+			return fmt.Errorf(`invalid keyValue for env "%s" or flag "%s", %s`, env, flag, err.Error())
+		}
+		return nil
+	})
+}
+
+func SetValidate[T Configurable](take *T, envKey, flagKey string, def T, validator func(*T) error) {
+	wrap(envKey, flagKey, take, validator)
+	set[T](take, envKey, flagKey, def, nil)
+}
+
+func SetPairValidate[K Configurable, V Configurable](take *KeyValue[K, V], envKey, flagKey string, def KeyValue[K, V], keyValidator func(*K) error, valueValidator func(*V) error, keyValueValidator func(*K, *V) error) {
+	wrapKV(envKey, flagKey, take, keyValidator, valueValidator, keyValueValidator)
 	*take = def
 	setKVarray(&[]*KeyValue[K, V]{take}, envKey, flagKey, []KeyValue[K, V]{*take}, 0)
 }
 
+func SetEnvValidate[T Configurable](take *T, envKey string, def T, validator func(*T) error) {
+	SetValidate(take, envKey, "", def, validator)
+}
+
+func SetFlagValidate[T Configurable](take *T, flagKey string, def T, validator func(*T) error) {
+	SetValidate(take, "", flagKey, def, validator)
+}
+
+func nopValidate[T Configurable](t *T) error {
+	if t == nil {
+		return errors.New("value is nill")
+	}
+	return nil
+}
+
+func nopKVValidate[K Configurable, V Configurable](k *K, v *V) error {
+	if k == nil {
+		return errors.New("key is nill")
+	}
+	if v == nil {
+		return errors.New("value is nill")
+	}
+	return nil
+}
+
+func Set[T Configurable](take *T, envKey, flagKey string, def T) {
+	SetValidate(take, envKey, flagKey, def, nopValidate)
+}
+
+func SetPair[K Configurable, V Configurable](take *KeyValue[K, V], envKey, flagKey string, def KeyValue[K, V]) {
+	SetPairValidate(take, envKey, flagKey, def, nopValidate, nopValidate, nopKVValidate)
+}
+
 func SetEnv[T Configurable](take *T, envKey string, def T) {
-	Set(take, envKey, "", def)
+	SetEnvValidate(take, envKey, def, nopValidate)
 }
 
 func SetFlag[T Configurable](take *T, flagKey string, def T) {
-	Set(take, "", flagKey, def)
+	SetFlagValidate(take, flagKey, def, nopValidate)
 }
 
 // func SetEnvKV[K Configurable, V Configurable](take *KeyValue[K, V], envKey string, def KeyValue[K, V]) {
@@ -162,4 +230,10 @@ func Read() {
 	boolFlags = map[string]*bool{}
 	flagFuncs = map[string]func(string) error{}
 	flag.Parse()
+	for _, validator := range validators {
+		if err := validator(); err != nil {
+			panic(err)
+		}
+	}
+	validators = []func() error{}
 }

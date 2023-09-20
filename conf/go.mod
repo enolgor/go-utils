@@ -1,6 +1,6 @@
 module github.com/enolgor/go-utils/conf
 
-go 1.20
+go 1.21
 
 require github.com/enolgor/go-utils/parse v1.0.0
 
