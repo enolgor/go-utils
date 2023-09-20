@@ -1,6 +1,6 @@
 module github.com/enolgor/go-utils/examples
 
-go 1.21
+go 1.21.1
 
 require (
 	github.com/enolgor/go-utils/client v1.1.2
@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/enolgor/go-utils/validators v1.2.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 )

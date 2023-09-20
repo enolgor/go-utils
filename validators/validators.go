@@ -6,11 +6,6 @@ import (
 	"net/mail"
 )
 
-type validator struct {
-	Strings  stringValidators
-	Integers intValidators
-}
-
 type stringValidators struct {
 	NotEmpty   func(s *string) error
 	ValidEmail func(s *string) error
@@ -22,16 +17,15 @@ type intValidators struct {
 	EqOrGreaterThan func(min int) func(i *int) error
 }
 
-var Validator validator = validator{
-	Strings: stringValidators{
-		NotEmpty:   stringNotEmpty,
-		ValidEmail: stringValidEmail,
-		Len:        stringLen,
-	},
-	Integers: intValidators{
-		BetweenIncl:     intBetweenIncl,
-		EqOrGreaterThan: intEqOrGreaterThan,
-	},
+var Strings stringValidators = stringValidators{
+	NotEmpty:   stringNotEmpty,
+	ValidEmail: stringValidEmail,
+	Len:        stringLen,
+}
+
+var Integers intValidators = intValidators{
+	BetweenIncl:     intBetweenIncl,
+	EqOrGreaterThan: intEqOrGreaterThan,
 }
 
 func stringNotEmpty(s *string) error {

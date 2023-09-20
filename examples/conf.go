@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/enolgor/go-utils/conf"
+	"github.com/enolgor/go-utils/validators"
 	"golang.org/x/text/language"
 )
 
@@ -18,12 +19,7 @@ var LANG conf.KeyValue[language.Tag, bool]
 
 func init() {
 	os.Setenv("HOST", "asdf")
-	conf.SetValidate(&PORT, "PORT", "p", 8080, func(port *int) error {
-		if *port < 10000 {
-			return errors.New("port must be greater than 10000")
-		}
-		return nil
-	})
+	conf.SetValidate(&PORT, "PORT", "p", 8080, validators.Integers.EqOrGreaterThan(10000))
 	conf.SetEnv(&HOST, "HOST", "localhost")
 	conf.SetFlag(&TIMEZONE, "tz", *time.UTC)
 	conf.Set(&TEST, "TEST", "t", false)
