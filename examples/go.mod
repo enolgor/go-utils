@@ -1,6 +1,6 @@
 module github.com/enolgor/go-utils/examples
 
-go 1.20
+go 1.21
 
 require (
 	github.com/enolgor/go-utils/client v1.1.2
