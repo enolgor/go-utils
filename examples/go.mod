@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	github.com/enolgor/go-utils/validators v1.2.0 // indirect
+	github.com/enolgor/go-utils/validators v1.2.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 )

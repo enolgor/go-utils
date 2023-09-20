@@ -12,6 +12,8 @@ github.com/enolgor/go-utils/server v1.1.2 h1:5vzrMyDXzk2quqP/Q1NYmQM/hJAa0nC1ArZ
 github.com/enolgor/go-utils/server v1.1.2/go.mod h1:xiVo6B+UJaiqCbMGDQKREdCW4ZawhG4adDJ32a5Y0BM=
 github.com/enolgor/go-utils/validators v1.2.0 h1:B8ek9QYQUBc/pHWFmk+5rKL+5235PQ3w2Cn2ysGRg+g=
 github.com/enolgor/go-utils/validators v1.2.0/go.mod h1:poL4KVr31zOoQFOTvpd53oWjSWDYkjbomce0lULMcdU=
+github.com/enolgor/go-utils/validators v1.2.1 h1:2iQnMlFAzGOdNNJq7Pd4XVATmlv1CKRIGv+sQH0OXIY=
+github.com/enolgor/go-utils/validators v1.2.1/go.mod h1:poL4KVr31zOoQFOTvpd53oWjSWDYkjbomce0lULMcdU=
 github.com/golang-jwt/jwt/v5 v5.0.0 h1:1n1XNM9hk7O9mnQoNBGolZvzebBQ7p93ULHRc28XJUE=
 github.com/golang-jwt/jwt/v5 v5.0.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=

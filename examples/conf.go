@@ -19,7 +19,7 @@ var LANG conf.KeyValue[language.Tag, bool]
 
 func init() {
 	os.Setenv("HOST", "asdf")
-	conf.SetValidate(&PORT, "PORT", "p", 8080, validators.Integers.EqOrGreaterThan(10000))
+	conf.SetValidate(&PORT, "PORT", "p", 8080, validators.Ints.EqOrGreaterThan(10000))
 	conf.SetEnv(&HOST, "HOST", "localhost")
 	conf.SetFlag(&TIMEZONE, "tz", *time.UTC)
 	conf.Set(&TEST, "TEST", "t", false)
