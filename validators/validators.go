@@ -20,3 +20,27 @@ func isPresent[P parse.Parseable](p *P) error {
 	}
 	return nil
 }
+
+func All[P parse.Parseable](validators ...func(*P) error) func(*P) error {
+	return func(v *P) error {
+		var errs error
+		for i := range validators {
+			errs = errors.Join(errs, validators[i](v))
+		}
+		return errs
+	}
+}
+
+func Any[P parse.Parseable](validators ...func(*P) error) func(*P) error {
+	return func(v *P) error {
+		var errs error
+		for i := range validators {
+			err := validators[i](v)
+			if err != nil {
+				return nil
+			}
+			errs = errors.Join(errs)
+		}
+		return errs
+	}
+}
