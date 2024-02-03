@@ -32,7 +32,7 @@ func NewRouter() *Router {
 	}
 }
 
-func (r *Router) register(method string, pathExpr string, handler http.HandlerFunc) *Router {
+func (r *Router) Register(method string, pathExpr string, handler http.HandlerFunc) *Router {
 	matcher, err := path.Matcher(pathExpr)
 	if err != nil {
 		panic(err)
@@ -42,23 +42,27 @@ func (r *Router) register(method string, pathExpr string, handler http.HandlerFu
 }
 
 func (r *Router) Get(pathExpr string, handler http.HandlerFunc) *Router {
-	return r.register("GET", pathExpr, handler)
+	return r.Register("GET", pathExpr, handler)
 }
 
 func (r *Router) Post(pathExpr string, handler http.HandlerFunc) *Router {
-	return r.register("POST", pathExpr, handler)
+	return r.Register("POST", pathExpr, handler)
 }
 
 func (r *Router) Put(pathExpr string, handler http.HandlerFunc) *Router {
-	return r.register("PUT", pathExpr, handler)
+	return r.Register("PUT", pathExpr, handler)
 }
 
 func (r *Router) Patch(pathExpr string, handler http.HandlerFunc) *Router {
-	return r.register("PATCH", pathExpr, handler)
+	return r.Register("PATCH", pathExpr, handler)
 }
 
 func (r *Router) Delete(pathExpr string, handler http.HandlerFunc) *Router {
-	return r.register("DELETE", pathExpr, handler)
+	return r.Register("DELETE", pathExpr, handler)
+}
+
+func (r *Router) Options(pathExpr string, handler http.HandlerFunc) *Router {
+	return r.Register("OPTIONS", pathExpr, handler)
 }
 
 func (r *Router) NotFoundHandler(handler http.HandlerFunc) *Router {
@@ -89,7 +93,7 @@ func (r *Router) SubRoute(pathExpr string, router *Router) *Router {
 			panic(err)
 		}
 	}
-	r.register("ANY", pathExpr+"(.*)", router.ServeHTTP)
+	r.Register("ANY", pathExpr+"(.*)", router.ServeHTTP)
 	return r
 }
 
