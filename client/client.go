@@ -20,11 +20,23 @@ type Request struct {
 }
 
 func Get(url string) *Request {
-	return &Request{"GET", url, map[string]string{}, nil, 0, nil}
+	return New("GET", url)
 }
 
 func Post(url string) *Request {
-	return &Request{"POST", url, map[string]string{}, nil, 0, nil}
+	return New("POST", url)
+}
+
+func Put(url string) *Request {
+	return New("PUT", url)
+}
+
+func Delete(url string) *Request {
+	return New("DELETE", url)
+}
+
+func New(method string, url string) *Request {
+	return &Request{method, url, map[string]string{}, nil, 0, nil}
 }
 
 func (r *Request) WithHeader(key, value string) *Request {
