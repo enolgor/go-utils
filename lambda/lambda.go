@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
-	"github.com/enolgor/go-utils/server"
 )
 
 // func WithAuthentication(handler Handler, expiry time.Duration, password string) Handler {
@@ -59,11 +57,11 @@ import (
 // 	handlers[path] = f
 // }
 
-func Handler(router *server.Router) func(event *LambdaRequest) (*LambdaResponse, error) {
+func Handler(hn http.Handler) func(event *LambdaRequest) (*LambdaResponse, error) {
 	return func(event *LambdaRequest) (*LambdaResponse, error) {
 		rw := NewLambdaResponseWriter()
 		req := GetRequest(event)
-		router.ServeHTTP(rw, req)
+		hn.ServeHTTP(rw, req)
 		return rw.GetLambdaResponse(), nil
 	}
 }
